@@ -1,15 +1,15 @@
 // src/App.jsx
 import { useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import LoginPage from './pages/LoginPage.jsx';
-import AttendancePage from './pages/AttendancePage.jsx';
+import LoginPage from './pages/LoginPage';
+import AttendancePage from './pages/AttendancePage';
+import HomePage from './pages/HomePage';       // 추가
+import SignUpPage from './pages/SignUpPage';   // 추가
 import './App.css';
 
 function App() {
-    // 로그인 상태를 관리합니다. 실제로는 Redux나 Context API를 사용하는 것이 좋습니다.
     const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-    // 로그인 성공 시 호출될 함수
     const handleLogin = () => {
         setIsLoggedIn(true);
     };
@@ -17,17 +17,25 @@ function App() {
     return (
         <BrowserRouter>
             <Routes>
-                {/* '/login' 경로로 접속하면 LoginPage를 보여줍니다. */}
+                {/* 1. 초기 페이지 경로 */}
+                <Route path="/" element={<HomePage />} />
+
+                {/* 2. 회원가입 페이지 경로 */}
+                <Route path="/signup" element={<SignUpPage />} />
+
+                {/* 3. 로그인 페이지 경로 */}
                 <Route path="/login" element={<LoginPage onLogin={handleLogin} />} />
 
-                {/* 기본 '/' 경로로 접속하면 로그인 상태를 확인합니다. */}
+                {/* 4. 출석부 페이지 경로 (로그인해야 접근 가능) */}
                 <Route
-                    path="/"
+                    path="/attendance"
                     element={
-                        // 로그인 상태이면 출석부 페이지로, 아니면 로그인 페이지로 이동시킵니다.
                         isLoggedIn ? <AttendancePage /> : <Navigate to="/login" />
                     }
                 />
+
+                {/* 잘못된 경로로 접근 시 초기 페이지로 이동 */}
+                <Route path="*" element={<Navigate to="/" />} />
             </Routes>
         </BrowserRouter>
     );

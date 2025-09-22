@@ -1,6 +1,6 @@
 // src/pages/LoginPage.jsx
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom'; // Link 추가
 
 const LoginPage = ({ onLogin }) => {
     const [username, setUsername] = useState('');
@@ -9,13 +9,12 @@ const LoginPage = ({ onLogin }) => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        // 실제 애플리케이션에서는 여기서 서버에 아이디/비밀번호를 보내 검증합니다.
-        // 이 예제에서는 간단하게 입력만 하면 로그인 성공으로 처리합니다.
         if (username && password) {
-            onLogin(); // App.jsx의 handleLogin 함수를 호출해 로그인 상태를 true로 변경
-            navigate('/'); // 출석부 페이지로 이동
+            onLogin();
+            // 로그인 성공 시 '/attendance' 경로로 이동하도록 수정
+            navigate('/attendance');
         } else {
-            alert('아이디와 비밀번호를 입력하세요.');
+            alert('학번과 비밀번호를 입력하세요.');
         }
     };
 
@@ -24,7 +23,7 @@ const LoginPage = ({ onLogin }) => {
             <form onSubmit={handleSubmit} className="login-form">
                 <h1>로그인</h1>
                 <div className="input-group">
-                    <label htmlFor="username">학번</label>
+                    <label htmlFor="username">학번 (ID)</label>
                     <input
                         type="text"
                         id="username"
@@ -42,6 +41,10 @@ const LoginPage = ({ onLogin }) => {
                     />
                 </div>
                 <button type="submit" className="login-button">로그인</button>
+                {/* 회원가입 링크 추가 */}
+                <div className="form-footer">
+                    계정이 없으신가요? <Link to="/signup">회원가입</Link>
+                </div>
             </form>
         </div>
     );
