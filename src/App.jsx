@@ -1,48 +1,35 @@
 // src/App.jsx
 import { useState } from 'react';
-import StudentList from './components/StudentList';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import LoginPage from './pages/LoginPage.jsx';
+import AttendancePage from './pages/AttendancePage.jsx';
 import './App.css';
 
-// 초기 학생 데이터
-const initialStudents = [
-    { id: 1, studentId: '2025001', name: '홍길동', status: 'present' },
-    { id: 2, studentId: '2025002', name: '김철수', status: 'present' },
-    { id: 3, studentId: '2025003', name: '이영희', status: 'absent' },
-    { id: 4, studentId: '2025004', name: '박지성', status: 'late' },
-    { id: 5, studentId: '2025005', name: '손흥민', status: 'present' },
-];
-
 function App() {
-    const [students, setStudents] = useState(initialStudents);
+    // 로그인 상태를 관리합니다. 실제로는 Redux나 Context API를 사용하는 것이 좋습니다.
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-    // 날짜 정보
-    const today = new Date();
-    const dateString = today.toLocaleDateString('ko-KR', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        weekday: 'long',
-    });
-
-    // 학생의 출석 상태를 변경하는 함수
-    const handleStatusChange = (id, newStatus) => {
-        setStudents(
-            students.map((student) =>
-                student.id === id ? { ...student, status: newStatus } : student
-            )
-        );
+    // 로그인 성공 시 호출될 함수
+    const handleLogin = () => {
+        setIsLoggedIn(true);
     };
 
     return (
-        <div className="app-container">
-            <header className="app-header">
-                <h1> [출석부]</h1>
-                <p className="date-display">{dateString}</p>
-            </header>
-            <main>
-                <StudentList students={students} onStatusChange={handleStatusChange} />
-            </main>
-        </div>
+        <BrowserRouter>
+            <Routes>
+                {/* '/login' 경로로 접속하면 LoginPage를 보여줍니다. */}
+                <Route path="/login" element={<LoginPage onLogin={handleLogin} />} />
+
+                {/* 기본 '/' 경로로 접속하면 로그인 상태를 확인합니다. */}
+                <Route
+                    path="/"
+                    element={
+                        // 로그인 상태이면 출석부 페이지로, 아니면 로그인 페이지로 이동시킵니다.
+                        isLoggedIn ? <AttendancePage /> : <Navigate to="/login" />
+                    }
+                />
+            </Routes>
+        </BrowserRouter>
     );
 }
 
