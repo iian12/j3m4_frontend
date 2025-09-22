@@ -1,42 +1,116 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+/* src/App.css */
+.app-container {
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    padding: 24px;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+.app-header {
+    text-align: center;
+    border-bottom: 1px solid #e0e0e0;
+    padding-bottom: 16px;
+    margin-bottom: 24px;
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.app-header h1 {
+    margin: 0;
+    color: #333;
+    font-size: 2rem;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+.app-header .date-display {
+    margin: 8px 0 0;
+    color: #666;
+    font-size: 1rem;
 }
 
-.card {
-  padding: 2em;
+/* StudentItem.jsx 스타일 */
+.student-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    border: 1px solid #eee;
 }
 
-.read-the-docs {
-  color: #888;
+.student-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.student-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.student-id {
+    font-size: 0.9rem;
+    color: #888;
+    background-color: #f5f5f5;
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
+.student-name {
+    font-weight: 500;
+    font-size: 1.1rem;
+}
+
+/* 상태별 스타일 */
+.student-item.present .student-name {
+    color: #28a745; /* 초록색 */
+}
+.student-item.absent .student-name {
+    color: #dc3545; /* 빨간색 */
+    text-decoration: line-through;
+}
+.student-item.late .student-name {
+    color: #ffc107; /* 노란색 */
+}
+
+
+.status-buttons button {
+    border: 1px solid #ccc;
+    background-color: #fff;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-left: 6px;
+    transition: background-color 0.2s, color 0.2s;
+    font-weight: 500;
+}
+
+.status-buttons button:hover {
+    background-color: #f0f0f0;
+}
+
+/* 활성화된 버튼 스타일 */
+.status-buttons button.active {
+    color: #fff;
+}
+
+.student-item.present .status-buttons button:nth-child(1),
+.status-buttons button.active:nth-child(1) {
+    background-color: #28a745;
+    border-color: #28a745;
+}
+
+.student-item.absent .status-buttons button:nth-child(2),
+.status-buttons button.active:nth-child(2) {
+    background-color: #dc3545;
+    border-color: #dc3545;
+}
+
+.student-item.late .status-buttons button:nth-child(3),
+.status-buttons button.active:nth-child(3) {
+    background-color: #ffc107;
+    border-color: #ffc107;
 }
