@@ -1,70 +1,61 @@
-/* src/pages/HomePage.css */
-
 .home-container {
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     height: 100vh;
+    width: 100vw;
+    background-color: #f5f6fa;
     text-align: center;
-    padding: 20px;
-    box-sizing: border-box;
 }
 
 .home-content {
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
+    margin-bottom: 40px;
 }
 
-/* <img> 태그에 적용될 이미지 스타일 */
 .club-logo-img {
-    width: 150px;
-    height: 150px;
-    margin-bottom: 24px;
-    object-fit: contain; /* 이미지가 잘리지 않고 비율을 유지하며 컨테이너에 맞게 들어갑니다. */
+    width: 120px;
+    height: 120px;
+    margin-bottom: 20px;
 }
 
 .home-content h1 {
-    font-size: 2.5rem;
-    margin-bottom: 12px;
+    font-size: 36px;
+    color: #273c75;
+    margin-bottom: 10px;
 }
 
 .home-content p {
-    font-size: 1.1rem;
-    color: #666;
-    max-width: 400px;
+    font-size: 16px;
+    color: #2f3640;
 }
 
 .home-buttons {
     display: flex;
     gap: 20px;
-    padding-bottom: 40px; /* 하단 여백 */
 }
 
 .home-button {
-    padding: 12px 32px;
-    border-radius: 8px;
+    padding: 12px 25px;
+    border-radius: 6px;
     text-decoration: none;
-    font-size: 1.1rem;
-    font-weight: bold;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.home-button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    color: #fff;
+    font-size: 16px;
+    transition: background-color 0.2s;
 }
 
 .home-button.login {
-    background-color: #646cff;
-    color: white;
+    background-color: #273c75;
+}
+
+.home-button.login:hover {
+    background-color: #192a56;
 }
 
 .home-button.signup {
-    background-color: #f0f0f0;
-    color: #333;
-    border: 1px solid #ccc;
+    background-color: #ffd166;
+}
+
+.home-button.signup:hover {
+    background-color: #ffd166;
 }
