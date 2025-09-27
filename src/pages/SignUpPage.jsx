@@ -10,7 +10,6 @@ const SignUpPage = () => {
         password: '',
         name: '',
         email: '',
-        phonenumber: ''
     });
     const navigate = useNavigate();
 
@@ -77,17 +76,6 @@ const SignUpPage = () => {
                         id="email"
                         name="email"
                         value={formData.email}
-                        onChange={handleChange}
-                        required
-                    />
-                </div>
-                <div className="input-group">
-                    <label htmlFor="phonenumber">전화번호</label>
-                    <input
-                        type="phonenumber"
-                        id="phonenumber"
-                        name="phonenumber"
-                        value={formData.phonenumber}
                         onChange={handleChange}
                         required
                     />
