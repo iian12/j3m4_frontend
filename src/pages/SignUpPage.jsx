@@ -82,7 +82,7 @@ const SignUpPage = () => {
                     />
                 </div>
                 <div className="input-group">
-                    <label htmlFor="phoneNumber">전화번호(휴대전화)</label>
+                    <label htmlFor="phoneNumber">휴대전화</label>
                     <input
                         type="phoneNumber"
                         id="phoneNumber"
