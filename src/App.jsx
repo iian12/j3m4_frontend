@@ -1,37 +1,46 @@
-// src/App.jsx
+import React, { useState, useEffect } from "react";
+import { BrowserRouter as Router, Routes, Route, Navigate, Link, useNavigate } from "react-router-dom";
+import HomePage from "./pages/HomePage";
+import LoginPage from "./pages/LoginPage";
+import SignupPage from "./pages/SignupPage";
+import AttendancePage from "./pages/AttendancePage";
 
-import React, { useState } from 'react';
-// useNavigate를 import 합니다.
-import { BrowserRouter as Router, Routes, Route, Navigate, Link, useNavigate } from 'react-router-dom';
-import HomePage from './pages/HomePage';
-import LoginPage from './pages/LoginPage';
-import SignupPage from './pages/SignupPage';
-import AttendancePage from './pages/AttendancePage';
 
-// 라우터 컨텍스트 안에서만 useNavigate를 호출할 수 있으므로 App 컴포넌트를 분리합니다.
 const AppContent = () => {
     const [user, setUser] = useState(null);
-    const navigate = useNavigate(); // 페이지 이동을 위해 useNavigate hook 사용
+    const navigate = useNavigate();
+
 
     const handleLogin = (userData) => {
         setUser(userData);
     };
 
-    // ✅ 1. handleLogout 함수에 navigate 로직 추가
+
     const handleLogout = () => {
-        localStorage.removeItem('token');
+        localStorage.removeItem("token");
         setUser(null);
-        navigate('/'); // 로그아웃 후 홈으로 이동
+        navigate("/", { replace: true });
     };
 
-    // ... useEffect 로직 ...
+
+// 새로고침 대비 — 토큰 존재 시, 서버에서 me 조회하거나(선택) 최소 저장된 사용자 복원 로직 추가 가능
+    useEffect(() => {
+        const token = localStorage.getItem("token");
+        if (token && !user) {
+
+// setUser({ studyId: "TEMP" });
+        }
+    }, [user]);
+
+
+    const isAuthed = !!user && !!user.studyId; // ✅ 보호 조건 통일
+
 
     return (
         <>
-            <nav style={{ padding: '1rem', background: '#f0f0f0', display: 'flex', gap: '1rem' }}>
+            <nav style={{ padding: "1rem", background: "#f0f0f0", display: "flex", gap: "1rem" }}>
                 <Link to="/">홈</Link>
-                {user ? (
-                    // ✅ 2. 사용자가 로그인 상태일 때 로그아웃 버튼 표시
+                {isAuthed ? (
                     <button onClick={handleLogout}>로그아웃</button>
                 ) : (
                     <Link to="/login">로그인</Link>
@@ -44,13 +53,7 @@ const AppContent = () => {
                     <Route path="/signup" element={<SignupPage />} />
                     <Route
                         path="/attendance"
-                        element={
-                            user && user.studyId ? (
-                                <AttendancePage studyId={user.studyId} />
-                            ) : (
-                                <Navigate to="/login" replace />
-                            )
-                        }
+                        element={isAuthed ? <AttendancePage studyId={user.studyId} /> : <Navigate to="/login" replace />}
                     />
                 </Routes>
             </main>
@@ -58,7 +61,7 @@ const AppContent = () => {
     );
 };
 
-// 최상위 컴포넌트에서 Router를 설정합니다.
+
 function App() {
     return (
         <Router>
@@ -66,5 +69,6 @@ function App() {
         </Router>
     );
 }
+
 
 export default App;

@@ -87,3 +87,53 @@
 .student-item.late {
     border-left: 5px solid #ff9800;
 }
+
+/* 모달 */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+}
+
+.modal-content {
+    background: #fff;
+    padding: 1rem 1.5rem;
+    border-radius: 8px;
+    max-width: 400px;
+    width: 100%;
+}
+
+.modal-content input {
+    display: block;
+    width: 100%;
+    margin: 0.3rem 0;
+    padding: 0.4rem 0.6rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.modal-content button {
+    margin-right: 0.5rem;
+    padding: 0.4rem 0.8rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.modal-content button[type="submit"] {
+    background-color: #4caf50;
+    color: #fff;
+}
+
+.modal-content button[type="button"] {
+    background-color: #f44336;
+    color: #fff;
+}
+
