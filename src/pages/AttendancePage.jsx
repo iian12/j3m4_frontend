@@ -1,9 +1,16 @@
 // src/pages/AttendancePage.jsx
 import React, { useState, useEffect, useCallback } from 'react';
-import { getAttendanceHistory, checkAttendance, getScheduleList, createSchedule } from '../api/index.js';
+import { useSearchParams } from 'react-router-dom';
+import {
+    getAttendanceHistory,
+    checkAttendance,
+    getScheduleList,
+    createSchedule
+} from '../api/index.js';
 import './AttendancePage.css';
 
 const AttendancePage = ({ studyId }) => {
+    const [searchParams] = useSearchParams();
     const [schedules, setSchedules] = useState([]);
     const [selectedScheduleId, setSelectedScheduleId] = useState(null);
     const [selectedDate, setSelectedDate] = useState(new Date());
@@ -18,13 +25,13 @@ const AttendancePage = ({ studyId }) => {
         time: '',
     });
 
-    // 일정 목록
+    // 일정 목록 로드 (초기 선택은 여기서 하지 않음)
     const fetchSchedules = useCallback(async () => {
         try {
             const res = await getScheduleList();
             const list = res?.data ?? [];
             setSchedules(list);
-            if (list.length > 0) setSelectedScheduleId(String(list[0].id));
+            // 👇 여기서 setSelectedScheduleId 하던 걸 제거
         } catch (e) {
             console.error(e);
             setError('일정 데이터를 불러오는 데 실패했습니다.');
@@ -33,14 +40,26 @@ const AttendancePage = ({ studyId }) => {
 
     useEffect(() => { fetchSchedules(); }, [fetchSchedules]);
 
-    // 출석 데이터
+    // URL ?scheduleId=xxx 있으면 우선 적용
+    useEffect(() => {
+        const qid = searchParams.get('scheduleId');
+        if (qid) setSelectedScheduleId(String(qid));
+    }, [searchParams]);
+
+    // 목록이 로드됐고 아직 아무 것도 선택되지 않았으면 첫 항목 선택
+    useEffect(() => {
+        if (!selectedScheduleId && schedules.length > 0) {
+            setSelectedScheduleId(String(schedules[0].id));
+        }
+    }, [schedules, selectedScheduleId]);
+
+    // 출석 데이터 로드
     const fetchAttendance = useCallback(async () => {
         if (!selectedScheduleId) return;
         setIsLoading(true);
         setError(null);
         try {
             const dateString = selectedDate.toISOString().split('T')[0];
-            // getAttendanceHistory(studyId, scheduleId, date)
             const res = await getAttendanceHistory(studyId, selectedScheduleId, dateString);
             setStudents(res?.data ?? []);
         } catch (e) {
@@ -53,7 +72,6 @@ const AttendancePage = ({ studyId }) => {
 
     useEffect(() => { fetchAttendance(); }, [fetchAttendance]);
 
-    // 상태 변경
     const handleStatusChange = async (studentId, status) => {
         try {
             await checkAttendance(studyId, {
@@ -62,14 +80,15 @@ const AttendancePage = ({ studyId }) => {
                 scheduleId: selectedScheduleId,
                 date: selectedDate.toISOString().split('T')[0],
             });
-            setStudents(prev => prev.map(s => s.id === studentId ? { ...s, status } : s));
+            setStudents(prev =>
+                prev.map(s => (s.id === Number(studentId) ? { ...s, status } : s))
+            );
         } catch (e) {
             console.error(e);
             alert('출석 상태 변경 실패');
         }
     };
 
-    // 새 일정
     const handleNewScheduleChange = (e) => {
         const { name, value } = e.target;
         setNewSchedule(prev => ({ ...prev, [name]: value }));
@@ -78,7 +97,7 @@ const AttendancePage = ({ studyId }) => {
     const handleCreateSchedule = async (e) => {
         e.preventDefault();
         try {
-            const res = await createSchedule(newSchedule); // createSchedule에서 time을 ISO로 변환
+            const res = await createSchedule(newSchedule);
             alert('일정 생성 완료!');
             setShowCreateModal(false);
             setNewSchedule({ title: '', place: '', description: '', time: '' });
@@ -90,7 +109,6 @@ const AttendancePage = ({ studyId }) => {
         }
     };
 
-    // ---------- 여기부터 당신이 올린 JSX ----------
     return (
         <div className="attendance-container">
             <h2>출석 관리</h2>
@@ -123,49 +141,22 @@ const AttendancePage = ({ studyId }) => {
                     <div className="modal-content">
                         <h3>새 일정 생성</h3>
                         <form onSubmit={handleCreateSchedule}>
-                            <input
-                                name="title"
-                                placeholder="제목"
-                                value={newSchedule.title}
-                                onChange={handleNewScheduleChange}
-                                required
-                            />
-                            <input
-                                name="place"
-                                placeholder="장소"
-                                value={newSchedule.place}
-                                onChange={handleNewScheduleChange}
-                                required
-                            />
-                            <input
-                                name="description"
-                                placeholder="설명"
-                                value={newSchedule.description}
-                                onChange={handleNewScheduleChange}
-                            />
-                            <input
-                                type="datetime-local"
-                                name="time"
-                                value={newSchedule.time}
-                                onChange={handleNewScheduleChange}
-                                required
-                            />
+                            <input name="title" placeholder="제목" value={newSchedule.title} onChange={handleNewScheduleChange} required />
+                            <input name="place" placeholder="장소" value={newSchedule.place} onChange={handleNewScheduleChange} required />
+                            <input name="description" placeholder="설명" value={newSchedule.description} onChange={handleNewScheduleChange} />
+                            <input type="datetime-local" name="time" value={newSchedule.time} onChange={handleNewScheduleChange} required />
                             <div style={{ marginTop: '0.5rem' }}>
                                 <button type="submit">생성</button>
-                                <button type="button" onClick={() => setShowCreateModal(false)}>
-                                    취소
-                                </button>
+                                <button type="button" onClick={() => setShowCreateModal(false)}>취소</button>
                             </div>
                         </form>
                     </div>
                 </div>
             )}
 
-            {/* 로딩/에러 */}
             {isLoading && <p>데이터 불러오는 중...</p>}
             {error && <p className="error-message">{error}</p>}
 
-            {/* 학생 리스트 */}
             {!isLoading && !error && students.length > 0 ? (
                 <div className="student-list">
                     {students.map((student) => (
@@ -174,24 +165,9 @@ const AttendancePage = ({ studyId }) => {
                                 {student.name} ({student.studentId})
                             </div>
                             <div className="status-buttons">
-                                <button
-                                    className={student.status === 'present' ? 'active' : ''}
-                                    onClick={() => handleStatusChange(student.id, 'present')}
-                                >
-                                    출석
-                                </button>
-                                <button
-                                    className={student.status === 'late' ? 'active' : ''}
-                                    onClick={() => handleStatusChange(student.id, 'late')}
-                                >
-                                    지각
-                                </button>
-                                <button
-                                    className={student.status === 'absent' ? 'active' : ''}
-                                    onClick={() => handleStatusChange(student.id, 'absent')}
-                                >
-                                    결석
-                                </button>
+                                <button className={student.status === 'present' ? 'active' : ''} onClick={() => handleStatusChange(student.id, 'present')}>출석</button>
+                                <button className={student.status === 'late' ? 'active' : ''} onClick={() => handleStatusChange(student.id, 'late')}>지각</button>
+                                <button className={student.status === 'absent' ? 'active' : ''} onClick={() => handleStatusChange(student.id, 'absent')}>결석</button>
                             </div>
                         </div>
                     ))}

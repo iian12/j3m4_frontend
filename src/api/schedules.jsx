@@ -14,3 +14,4 @@ export const createSchedule = (data) => {
 
 export const getScheduleList = () => api.get("/schedules/list");
 export const getScheduleById = (id) => api.get(`/schedules/${id}`);
+export const deleteSchedule = (id) => api.delete(`/schedules/${id}`);
