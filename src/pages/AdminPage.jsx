@@ -1,62 +1,52 @@
-import React, { useEffect, useState } from 'react';
-import { api } from '../api';
+import React, { useEffect, useState } from "react";
+import { getPendingUsers, approveUser } from "../api";
+import "./AdminPage.css";
 
 export default function AdminPage() {
     const [pendingUsers, setPendingUsers] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        const fetchPending = async () => {
-            try {
-                const res = await api.get('/users/pending');
-                setPendingUsers(res.data || []);
-            } catch (err) {
-                console.error('대기 회원 조회 실패:', err);
-                alert('대기 회원 조회 실패');
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchPending();
-    }, []);
-
-    const approveUser = async (id) => {
-        if (!window.confirm('이 회원을 승인하시겠습니까?')) return;
+    const loadPending = async () => {
+        setLoading(true);
         try {
-            await api.post(`/users/approve/${id}`);
-            setPendingUsers((prev) => prev.filter((u) => u.id !== id));
-            alert('승인 완료!');
+            const res = await getPendingUsers();
+            setPendingUsers(res.data || []);
         } catch (err) {
-            console.error('승인 실패:', err);
-            alert('승인 실패');
+            alert("대기중인 회원을 불러오지 못했습니다.");
+            console.error(err);
+        } finally {
+            setLoading(false);
         }
     };
 
-    if (loading) return <p style={{ textAlign: 'center', marginTop: '2rem' }}>불러오는 중...</p>;
+    useEffect(() => { loadPending(); }, []);
+
+    const handleApprove = async (id) => {
+        if (!window.confirm("승인하시겠습니까?")) return;
+        try {
+            await approveUser(id);
+            setPendingUsers(prev => prev.filter(u => u.id !== id));
+            alert("승인 완료!");
+        } catch (err) {
+            alert("승인 실패");
+            console.error(err);
+        }
+    };
+
+    if (loading) return <p style={{ textAlign: "center", marginTop: "2rem" }}>불러오는 중...</p>;
 
     return (
-        <div style={{ maxWidth: 600, margin: '2rem auto' }}>
+        <div className="admin-container">
             <h2>회원 승인</h2>
-            {pendingUsers.length === 0 ? (
-                <p>대기 중인 회원이 없습니다.</p>
-            ) : (
-                pendingUsers.map((u) => (
-                    <div
-                        key={u.id}
-                        style={{
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                            border: '1px solid #ddd',
-                            borderRadius: '6px',
-                            padding: '0.5rem 1rem',
-                            marginBottom: '0.5rem'
-                        }}
-                    >
-                        <span>{u.name} ({u.studentId})</span>
-                        <button onClick={() => approveUser(u.id)}>승인</button>
-                    </div>
-                ))
+            {pendingUsers.length === 0 ? <p>대기중인 회원이 없습니다.</p> : (
+                <ul className="pending-list">
+                    {pendingUsers.map(u => (
+                        <li key={u.id} className="pending-item">
+                            <span>{u.name} ({u.studentId})</span>
+                            <button onClick={() => handleApprove(u.id)}>승인</button>
+                        </li>
+                    ))}
+                </ul>
             )}
         </div>
     );

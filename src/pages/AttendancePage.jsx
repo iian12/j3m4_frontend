@@ -1,182 +1,107 @@
-// src/pages/AttendancePage.jsx
-import React, { useState, useEffect, useCallback } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import {
-    getAttendanceHistory,
-    checkAttendance,
-    getScheduleList,
-    createSchedule
-} from '../api/index.js';
-import './AttendancePage.css';
+import React, { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import { getAttendanceHistory, checkAttendance } from "../api";
+import "./AttendancePage.css";
 
-const AttendancePage = ({ studyId }) => {
-    const [searchParams] = useSearchParams();
-    const [schedules, setSchedules] = useState([]);
-    const [selectedScheduleId, setSelectedScheduleId] = useState(null);
-    const [selectedDate, setSelectedDate] = useState(new Date());
+export default function AttendancePage({ role, user }) {
+    const { scheduleId } = useParams();
     const [students, setStudents] = useState([]);
-    const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState(null);
-    const [showCreateModal, setShowCreateModal] = useState(false);
-    const [newSchedule, setNewSchedule] = useState({
-        title: '',
-        place: '',
-        description: '',
-        time: '',
-    });
+    const [loading, setLoading] = useState(true);
 
-    // 일정 목록 로드 (초기 선택은 여기서 하지 않음)
-    const fetchSchedules = useCallback(async () => {
-        try {
-            const res = await getScheduleList();
-            const list = res?.data ?? [];
-            setSchedules(list);
-            // 👇 여기서 setSelectedScheduleId 하던 걸 제거
-        } catch (e) {
-            console.error(e);
-            setError('일정 데이터를 불러오는 데 실패했습니다.');
-        }
-    }, []);
-
-    useEffect(() => { fetchSchedules(); }, [fetchSchedules]);
-
-    // URL ?scheduleId=xxx 있으면 우선 적용
     useEffect(() => {
-        const qid = searchParams.get('scheduleId');
-        if (qid) setSelectedScheduleId(String(qid));
-    }, [searchParams]);
+        const fetchAttendance = async () => {
+            try {
+                const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
+                const res = await getAttendanceHistory(user.studyId, scheduleId, today);
+                setStudents(res.data || []);
+            } catch (err) {
+                alert("출석 데이터를 불러오지 못했습니다.");
+                console.error(err);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchAttendance();
+    }, [scheduleId, user.studyId]);
 
-    // 목록이 로드됐고 아직 아무 것도 선택되지 않았으면 첫 항목 선택
-    useEffect(() => {
-        if (!selectedScheduleId && schedules.length > 0) {
-            setSelectedScheduleId(String(schedules[0].id));
+    const handleStatusChange = (id, status) => {
+        if (role === "USER") {
+            alert("출석체크 권한이 없습니다.");
+            return;
         }
-    }, [schedules, selectedScheduleId]);
+        setStudents(prev => prev.map(s => s.id === id ? { ...s, status } : s));
+    };
 
-    // 출석 데이터 로드
-    const fetchAttendance = useCallback(async () => {
-        if (!selectedScheduleId) return;
-        setIsLoading(true);
-        setError(null);
-        try {
-            const dateString = selectedDate.toISOString().split('T')[0];
-            const res = await getAttendanceHistory(studyId, selectedScheduleId, dateString);
-            setStudents(res?.data ?? []);
-        } catch (e) {
-            console.error(e);
-            setError('출석 데이터를 불러오는 데 실패했습니다.');
-        } finally {
-            setIsLoading(false);
+    const handleSave = async () => {
+        if (role === "USER") {
+            alert("출석체크 권한이 없습니다.");
+            return;
         }
-    }, [studyId, selectedScheduleId, selectedDate]);
 
-    useEffect(() => { fetchAttendance(); }, [fetchAttendance]);
-
-    const handleStatusChange = async (studentId, status) => {
         try {
-            await checkAttendance(studyId, {
-                studentId,
-                status,
-                scheduleId: selectedScheduleId,
-                date: selectedDate.toISOString().split('T')[0],
-            });
-            setStudents(prev =>
-                prev.map(s => (s.id === Number(studentId) ? { ...s, status } : s))
-            );
-        } catch (e) {
-            console.error(e);
-            alert('출석 상태 변경 실패');
+            const today = new Date().toISOString().split("T")[0];
+            for (let s of students) {
+                await checkAttendance(user.studyId, {
+                    studentId: s.studentId,
+                    status: s.status,
+                    scheduleId,
+                    date: today
+                });
+            }
+            alert("출석 저장 완료!");
+        } catch (err) {
+            alert("출석 저장 실패");
+            console.error(err);
         }
     };
 
-    const handleNewScheduleChange = (e) => {
-        const { name, value } = e.target;
-        setNewSchedule(prev => ({ ...prev, [name]: value }));
-    };
-
-    const handleCreateSchedule = async (e) => {
-        e.preventDefault();
-        try {
-            const res = await createSchedule(newSchedule);
-            alert('일정 생성 완료!');
-            setShowCreateModal(false);
-            setNewSchedule({ title: '', place: '', description: '', time: '' });
-            await fetchSchedules();
-            if (res?.data?.id) setSelectedScheduleId(String(res.data.id));
-        } catch (e) {
-            console.error(e);
-            alert('일정 생성 실패');
-        }
-    };
+    if (loading) return <p>불러오는 중…</p>;
 
     return (
         <div className="attendance-container">
-            <h2>출석 관리</h2>
-
-            {/* 날짜 선택 */}
-            <input
-                type="date"
-                value={selectedDate.toISOString().split('T')[0]}
-                onChange={(e) => setSelectedDate(new Date(e.target.value))}
-                className="date-picker"
-            />
-
-            {/* 일정 선택 */}
-            <select
-                value={selectedScheduleId || ''}
-                onChange={(e) => setSelectedScheduleId(e.target.value)}
-                className="date-picker"
-            >
-                {schedules.map((s) => (
-                    <option key={s.id} value={s.id}>
-                        {s.title} ({s.time ? new Date(s.time).toLocaleString() : '시간 미정'})
-                    </option>
-                ))}
-            </select>
-
-            {/* 새 일정 생성 */}
-            <button onClick={() => setShowCreateModal(true)}>새 일정 생성</button>
-            {showCreateModal && (
-                <div className="modal">
-                    <div className="modal-content">
-                        <h3>새 일정 생성</h3>
-                        <form onSubmit={handleCreateSchedule}>
-                            <input name="title" placeholder="제목" value={newSchedule.title} onChange={handleNewScheduleChange} required />
-                            <input name="place" placeholder="장소" value={newSchedule.place} onChange={handleNewScheduleChange} required />
-                            <input name="description" placeholder="설명" value={newSchedule.description} onChange={handleNewScheduleChange} />
-                            <input type="datetime-local" name="time" value={newSchedule.time} onChange={handleNewScheduleChange} required />
-                            <div style={{ marginTop: '0.5rem' }}>
-                                <button type="submit">생성</button>
-                                <button type="button" onClick={() => setShowCreateModal(false)}>취소</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            )}
-
-            {isLoading && <p>데이터 불러오는 중...</p>}
-            {error && <p className="error-message">{error}</p>}
-
-            {!isLoading && !error && students.length > 0 ? (
-                <div className="student-list">
-                    {students.map((student) => (
-                        <div key={student.id} className={`student-item ${student.status || ''}`}>
-                            <div className="student-info">
-                                {student.name} ({student.studentId})
-                            </div>
-                            <div className="status-buttons">
-                                <button className={student.status === 'present' ? 'active' : ''} onClick={() => handleStatusChange(student.id, 'present')}>출석</button>
-                                <button className={student.status === 'late' ? 'active' : ''} onClick={() => handleStatusChange(student.id, 'late')}>지각</button>
-                                <button className={student.status === 'absent' ? 'active' : ''} onClick={() => handleStatusChange(student.id, 'absent')}>결석</button>
-                            </div>
+            <h1>출석체크</h1>
+            <div className="student-list">
+                {students.map(s => (
+                    <div
+                        key={s.id}
+                        className={`student-item ${
+                            s.status === "출석" ? "present" :
+                                s.status === "지각" ? "late" : "absent"
+                        }`}
+                    >
+                        <div className="student-info">
+                            <span className="student-name">{s.name}</span>
+                            <span className="student-id">{s.studentId}</span>
                         </div>
-                    ))}
-                </div>
-            ) : (
-                !isLoading && !error && <p>선택한 일정에 대한 출석 데이터가 없습니다.</p>
-            )}
+                        <div className="status-buttons">
+                            <button
+                                className={s.status === "출석" ? "present-btn" : ""}
+                                onClick={() => handleStatusChange(s.id, "출석")}
+                                disabled={role === "USER"}
+                            >
+                                출석
+                            </button>
+                            <button
+                                className={s.status === "지각" ? "late-btn" : ""}
+                                onClick={() => handleStatusChange(s.id, "지각")}
+                                disabled={role === "USER"}
+                            >
+                                지각
+                            </button>
+                            <button
+                                className={s.status === "결석" ? "absent-btn" : ""}
+                                onClick={() => handleStatusChange(s.id, "결석")}
+                                disabled={role === "USER"}
+                            >
+                                결석
+                            </button>
+                        </div>
+                    </div>
+                ))}
+            </div>
+            <button className="save-btn" onClick={handleSave} disabled={role === "USER"}>
+                저장
+            </button>
         </div>
     );
-};
-
-export default AttendancePage;
+}

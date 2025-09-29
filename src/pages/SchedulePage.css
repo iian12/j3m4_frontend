@@ -1,134 +1,123 @@
-/* src/pages/SchedulePage.css */
+/* 전체 컨테이너 */
 .schedules-container {
-    max-width: 800px;
-    margin: 2rem auto;
-    padding: 1rem;
-    border: 1px solid #ddd;
-    border-radius: 10px;
-    background-color: #f9f9f9;
+    max-width: 720px;
+    margin: 3rem auto;
+    padding: 2rem;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    font-family: 'Segoe UI', Arial, sans-serif;
 }
 
-.schedules-container h2 {
-    margin-bottom: 1rem;
-    color: #333;
-}
-
-.toolbar {
-    display: flex;
-    justify-content: flex-end;
-    margin-bottom: 1rem;
-}
-
-.toolbar button {
-    padding: 0.5rem 0.9rem;
-    border: none;
-    border-radius: 6px;
-    background: #52c41a;
-    color: #fff;
-    cursor: pointer;
-}
-
-.error {
-    color: #d32029;
-    margin-bottom: 0.75rem;
-}
-
+/* 일정 리스트 */
 .schedule-list {
     list-style: none;
     padding: 0;
-    margin: 0;
+    margin-top: 1.5rem;
 }
 
 .schedule-list li {
     display: flex;
     justify-content: space-between;
-    align-items: stretch;
-    padding: 0.75rem 1rem;
-    margin-bottom: 0.6rem;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    background: #fff;
-    gap: 0.75rem;
-}
-
-.schedule-list li .meta {
-    flex: 1;
-    cursor: pointer;
-}
-
-.schedule-list li .title {
-    font-weight: 600;
-    margin-bottom: 0.25rem;
-}
-
-.schedule-list li .sub {
-    font-size: 0.9rem;
-    color: #666;
-}
-
-.schedule-list li button {
-    padding: 0.4rem 0.7rem;
-    border: none;
-    border-radius: 6px;
-    background: #ff4d4f;
-    color: #fff;
-    cursor: pointer;
-}
-
-.schedule-list li:hover {
-    background-color: #f6ffed;
-    border-color: #b7eb8f;
-}
-
-.schedule-list .empty {
-    text-align: center;
-    color: #888;
-    padding: 1rem;
-}
-
-/* modal */
-.modal {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,.45);
-    display: flex;
     align-items: center;
-    justify-content: center;
-    z-index: 30;
+    padding: 1rem;
+    border-bottom: 1px solid #e1e1e1;
+    border-radius: 8px;
+    background: #f9f9fb;
+    margin-bottom: 0.75rem;
+    gap : 1rem;
 }
-.modal-content {
-    width: 100%;
-    max-width: 420px;
-    background: #fff;
-    padding: 1rem 1.2rem;
-    border-radius: 10px;
+
+.schedule-info strong {
+    font-size: 16px;
 }
+
+.schedule-desc {
+    margin-top: 0.25rem;
+    font-size: 14px;
+    color: #555;
+}
+
+/* 버튼 영역 */
+.schedule-actions {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+/* 공통 버튼 */
+.schedule-actions button,
+.new-btn,
+.new-schedule-form button {
+    font-weight: 600;
+    font-size: 15px;
+    padding: 0.5rem 0.9rem;
+    border-radius: 6px;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+}
+
+/* 출석 버튼 */
+.attendance-btn { background: #44bd32; color: #fff; }
+.attendance-btn:hover { background: #2ecc71; }
+
+/* 삭제 버튼 */
+.delete-btn { background: #e84118; color: #fff; }
+.delete-btn:hover { background: #c23616; }
+
+/* 새 일정 버튼 */
+.new-btn { background: #273c75; color: #fff; margin-bottom: 1rem; }
+.new-btn:hover { background: #192a56; }
+
+/* 새 일정 폼 */
 .new-schedule-form {
     display: flex;
     flex-direction: column;
     gap: 0.7rem;
 }
-.new-schedule-form input {
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    padding: 0.5rem 0.7rem;
+
+.new-schedule-form input,
+.new-schedule-form textarea {
+    padding: 0.75rem;
+    border: 1px solid #dcdde1;
+    border-radius: 8px;
+    font-size: 15px;
+    background: #fff;
 }
-.new-schedule-form .actions {
+
+.new-schedule-form input:focus,
+.new-schedule-form textarea:focus {
+    outline: none;
+    border: 1px solid #273c75;
+}
+
+/* 폼 버튼 */
+.form-actions {
     display: flex;
-    gap: 0.5rem;
     justify-content: flex-end;
+    gap: 0.5rem;
 }
-.new-schedule-form .actions button[type="submit"] {
-    background: #52c41a;
-    color: #fff;
+
+.new-schedule-form button[type="submit"] { background: #44bd32; color: #fff; }
+.new-schedule-form button[type="button"] { background: #e84118; color: #fff; }
+
+/* 모달 */
+.modal {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.4);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
 }
-.new-schedule-form .actions button[type="button"] {
-    background: #999;
-    color: #fff;
-}
-.new-schedule-form .actions button {
-    border: none;
-    border-radius: 6px;
-    padding: 0.45rem 0.8rem;
-    cursor: pointer;
+
+.modal-content {
+    background: #fff;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+    max-width: 500px;
+    width: 90%;
 }

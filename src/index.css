@@ -14,3 +14,9 @@ body {
     justify-content: center;
     padding-top: 40px;
 }
+
+button {
+    font-family: inherit;
+    cursor: pointer;
+}
+

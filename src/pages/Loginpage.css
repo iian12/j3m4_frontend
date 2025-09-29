@@ -11,9 +11,19 @@
 /* form 박스 */
 .login-form {
     background-color: #fff;
-    padding: 40px 30px;
+    padding: 40px 35px;
     border-radius: 10px;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    box-shadow: 0 1px 20px rgba(0,0,0,0.1);
+    height:350px;
+    width: 350px;
+}
+
+.sign-form {
+    background-color: #fff;
+    padding: 40px 35px;
+    border-radius: 10px;
+    box-shadow: 0 1px 20px rgba(0,0,0,0.1);
+    height:600px;
     width: 350px;
 }
 
@@ -38,7 +48,7 @@
 }
 
 .input-group input {
-    width: 100%;
+    width: 330px;
     padding: 10px;
     border-radius: 6px;
     border: 1px solid #dcdde1;

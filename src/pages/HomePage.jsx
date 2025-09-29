@@ -1,9 +1,8 @@
-// src/pages/HomePage.jsx
 import { Link } from 'react-router-dom';
 import './HomePage.css';
 import clubLogo from '../assets/onezero.png';
 
-const HomePage = () => {
+export default function HomePage() {
     return (
         <div className="home-container">
             <div className="home-content">
@@ -22,6 +21,4 @@ const HomePage = () => {
             </div>
         </div>
     );
-};
-
-export default HomePage;
+}

@@ -1,75 +1,92 @@
-import React, { useEffect, useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import HomePage from './pages/HomePage';
-import LoginPage from './pages/LoginPage';
-import SignupPage from './pages/SignupPage';
-import SchedulePage from './pages/SchedulePage';
-import AttendancePage from './pages/AttendancePage';
-import AdminPage from './pages/AdminPage';
-import MyPage from './pages/MyPage';
+// src/App.jsx
+import React, { useState, useEffect } from "react";
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from "react-router-dom";
+import Navbar from "./components/Navbar";
+import HomePage from "./pages/HomePage";
+import LoginPage from "./pages/LoginPage";
+import SignUpPage from "./pages/SignUpPage";
+import MyPage from "./pages/MyPage";
+import AdminPage from "./pages/AdminPage";
+import SchedulePage from "./pages/SchedulePage";
+import AttendancePage from "./pages/AttendancePage";
 
-function App() {
-    const [user, setUser] = useState(null);
+function AppRoutes({ user, setUser }) {
+    const location = useLocation();
 
     useEffect(() => {
-        const savedUser = localStorage.getItem('user');
-        if (savedUser) setUser(JSON.parse(savedUser));
-    }, []);
-
-    const handleLogin = (loggedUser) => {
-        setUser(loggedUser);
-        localStorage.setItem('user', JSON.stringify(loggedUser));
-    };
-
-    const isAuthed = !!user;
+        if (location.state?.alert) {
+            alert(location.state.alert);
+        }
+    }, [location.state]);
 
     return (
-        <Router>
-            <Routes>
-                <Route path="/" element={<HomePage />} />
-                <Route path="/login" element={<LoginPage onLogin={handleLogin} />} />
-                <Route path="/signup" element={<SignupPage />} />
+        <Routes>
+            <Route path="/" element={<HomePage />} />
 
-                {/* MANAGER & ADMIN 공통 페이지 */}
-                <Route
-                    path="/schedule"
-                    element={
-                        isAuthed && ['MANAGER', 'ADMIN'].includes(user.role)
-                            ? <SchedulePage />
-                            : <Navigate to="/login" replace />
-                    }
-                />
-                <Route
-                    path="/attendance"
-                    element={
-                        isAuthed && ['MANAGER', 'ADMIN'].includes(user.role)
-                            ? <AttendancePage studyId={user.studyId} />
-                            : <Navigate to="/login" replace />
-                    }
-                />
+            <Route
+                path="/login"
+                element={<LoginPage onLogin={setUser} />}
+            />
+            <Route path="/signup" element={<SignUpPage />} />
 
-                {/* USER 전용 페이지 */}
-                <Route
-                    path="/mypage"
-                    element={
-                        isAuthed && user.role === 'USER'
-                            ? <MyPage user={user} />
-                            : <Navigate to="/login" replace />
-                    }
-                />
+            <Route
+                path="/mypage"
+                element={
+                    user && user.isApproved ? (
+                        <MyPage user={user} />
+                    ) : (
+                        <Navigate to="/login" />
+                    )
+                }
+            />
 
-                {/* ADMIN 전용 페이지 */}
-                <Route
-                    path="/admin"
-                    element={
-                        isAuthed && user.role === 'ADMIN'
-                            ? <AdminPage />
-                            : <Navigate to="/login" replace />
-                    }
-                />
-            </Routes>
-        </Router>
+            <Route
+                path="/admin"
+                element={
+                    user?.role === "ADMIN" ? (
+                        <AdminPage />
+                    ) : (
+                        <Navigate to="/" state={{ alert: "관리자만 접근 가능합니다." }} />
+                    )
+                }
+            />
+
+            <Route
+                path="/schedule"
+                element={user ? <SchedulePage role={user.role} /> : <Navigate to="/login" />}
+            />
+
+            <Route
+                path="/attendance/:scheduleId"
+                element={user ? <AttendancePage role={user.role} /> : <Navigate to="/login" />}
+            />
+
+            <Route path="*" element={<Navigate to="/" />} />
+        </Routes>
     );
 }
 
-export default App;
+export default function App() {
+    const [user, setUser] = useState(null);
+
+    // 처음에는 로그아웃 상태
+    useEffect(() => {
+        const stored = localStorage.getItem("user");
+        if (stored) setUser(JSON.parse(stored));
+    }, []);
+
+    const handleLogout = () => {
+        setUser(null);
+        localStorage.removeItem("user");
+    };
+
+    return (
+        <Router>
+            {/* 로그인 상태일 때만 Navbar 표시 */}
+            {user && <Navbar user={user} onLogout={handleLogout} />}
+
+            {/* 라우트 */}
+            <AppRoutes user={user} setUser={setUser} />
+        </Router>
+    );
+}
